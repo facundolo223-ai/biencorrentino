@@ -1273,6 +1273,13 @@ async function confirmCheckout() {
         cashier_name: state.currentUser ? state.currentUser.name : 'Caja 1'
     };
 
+    // La pestaña de WhatsApp se abre AHORA (dentro del clic del cajero): si se abre
+    // después del fetch, el navegador la bloquea como popup.
+    let waTab = null;
+    if (window.SEND_TICKET_WHATSAPP) {
+        try { waTab = window.open('about:blank', 'rsmarket-wa'); } catch (e) { waTab = null; }
+    }
+
     try {
         const res = await fetch('/api/checkout', {
             method: 'POST',
@@ -1282,6 +1289,7 @@ async function confirmCheckout() {
 
         const data = await res.json();
         if (!res.ok || !data.success) {
+            if (waTab) waTab.close();
             alert(data.error || "Error al procesar la venta");
             return;
         }
@@ -1296,10 +1304,73 @@ async function confirmCheckout() {
         loadCurrentShift();
         loadProducts(); // para refrescar stock
 
+        // Enviar el ticket como pedido al WhatsApp del local
+        if (window.SEND_TICKET_WHATSAPP) {
+            const waUrl = `https://wa.me/${getShopWhatsApp()}?text=${encodeURIComponent(buildSaleMessage(data.order))}`;
+            if (waTab && !waTab.closed) {
+                waTab.location.href = waUrl;
+            } else {
+                window.open(waUrl, '_blank');
+            }
+        } else if (waTab) {
+            waTab.close();
+        }
+
     } catch (err) {
+        if (waTab) waTab.close();
         console.error("Error en checkout:", err);
         alert("Hubo un error de conexión al procesar la venta.");
     }
+}
+
+/**
+ * WhatsApp del local (misma normalización que la Tienda 3D).
+ */
+function getShopWhatsApp() {
+    let n = String(window.STORE_WHATSAPP || '5493794821358').replace(/\D/g, '');
+    n = n.replace(/^0+/, '');
+    if (n.length === 10) {
+        n = '549' + n;
+    } else if (n.length === 11 && n.startsWith('54')) {
+        n = '549' + n.slice(2);
+    }
+    return n;
+}
+
+/**
+ * Arma el mensaje del ticket para mandarlo al WhatsApp del local como pedido.
+ */
+function buildSaleMessage(order) {
+    const labels = {
+        EFECTIVO: 'Efectivo',
+        DEBITO: 'Débito',
+        CREDITO: 'Crédito',
+        TRANSFERENCIA: 'QR / Transferencia',
+        CUENTA_CORRIENTE: 'Fiado (Libreta)'
+    };
+
+    let msg = `🧾 *TICKET ${order.order_number}*\n`;
+    msg += `📅 ${order.date || ''}\n`;
+    msg += `👤 ${order.customer_name || 'Consumidor Final'}\n`;
+    msg += `💳 ${labels[order.payment_method] || order.payment_method || ''}\n`;
+    msg += `🧑‍💼 Cajero: ${order.cashier_name || ''}\n`;
+    msg += `\n*Detalle:*\n`;
+
+    (order.items || []).forEach(it => {
+        const qty = Number(it.quantity);
+        const isKg = it.unit_type === 'kg';
+        const qtyTxt = isKg ? `${qty.toFixed(3)}kg` : `${qty}un`;
+        msg += `• ${qtyTxt} ${it.product_name} - $${formatMoney(it.subtotal)}\n`;
+    });
+
+    if (Number(order.discount_amount) > 0) {
+        msg += `\nSubtotal: $${formatMoney(order.subtotal)}\n`;
+        msg += `Descuento (${order.discount_percent}%): -$${formatMoney(order.discount_amount)}\n`;
+    }
+
+    msg += `\n💰 *TOTAL:* $${formatMoney(order.total)}\n`;
+    msg += `\n_Pedido generado en la caja_`;
+    return msg;
 }
 
 // --------------------------------------------------------------------------
@@ -2516,6 +2587,8 @@ async function loadConfigForm() {
         document.getElementById('cfg-business-phone').value = cfg.business_phone || '';
         const waField = document.getElementById('cfg-business-whatsapp');
         if (waField) waField.value = cfg.business_whatsapp || '';
+        const sendWaBox = document.getElementById('cfg-send-ticket-wa');
+        if (sendWaBox) sendWaBox.checked = String(cfg.send_ticket_whatsapp ?? '1') !== '0';
         document.getElementById('cfg-scale-prefix').value = cfg.scale_prefix || '20';
         document.getElementById('cfg-ticket-width').value = cfg.ticket_width || '80mm';
         document.getElementById('cfg-business-footer').value = cfg.business_footer || '';
@@ -2545,6 +2618,10 @@ async function saveConfiguration() {
     const waInput = document.getElementById('cfg-business-whatsapp');
     if (waInput && waInput.value.trim()) {
         payload.business_whatsapp = waInput.value.trim();
+    }
+    const sendWaChk = document.getElementById('cfg-send-ticket-wa');
+    if (sendWaChk) {
+        payload.send_ticket_whatsapp = sendWaChk.checked ? '1' : '0';
     }
 
     try {
