@@ -1,0 +1,230 @@
+/* ==========================================================================
+   Supermercado & Almacén POS - Hoja de Estilos y Reglas de Impresión Térmica
+   ========================================================================== */
+
+/* Barra de scroll estilizada */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+    background: #fdba74;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #ea580c;
+}
+
+/* Visor numérico digital */
+.font-mono-digits {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Animación de escaneo exitoso */
+@keyframes flash-scan {
+    0% { background-color: rgba(234, 88, 12, 0.35); }
+    100% { background-color: transparent; }
+}
+
+.flash-scanner-active {
+    animation: flash-scan 0.5s ease-out;
+}
+
+/* ==========================================================================
+   REGLAS PARA IMPRESIÓN DE TICKET TÉRMICO (58mm y 80mm)
+   ========================================================================== */
+@media print {
+    /* Ocultar toda la interfaz de la aplicación al imprimir */
+    body * {
+        visibility: hidden !important;
+    }
+
+    #thermal-ticket-container,
+    #thermal-ticket-container * {
+        visibility: visible !important;
+    }
+
+    #thermal-ticket-container {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        max-width: 80mm !important;
+        margin: 0 !important;
+        padding: 4mm !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-family: "Courier New", Courier, monospace !important;
+        font-size: 11px !important;
+        line-height: 1.25 !important;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    @page {
+        margin: 0;
+        size: auto;
+    }
+}
+
+/* ==========================================================================
+   CLASES DE PERSONALIZACIÓN DINÁMICA (DISEÑADOR DE INTERFAZ)
+   ========================================================================== */
+
+/* 1. Tipografías */
+.font-inter, body.font-inter {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+.font-roboto, body.font-roboto {
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+.font-poppins, body.font-poppins {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+.font-roboto-mono, body.font-roboto-mono {
+    font-family: 'Roboto Mono', ui-monospace, SFMono-Regular, monospace !important;
+}
+.font-outfit, body.font-outfit {
+    font-family: 'Outfit', sans-serif !important;
+}
+.font-system, body.font-system {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* 2. Escala de Texto */
+body.text-scale-compact {
+    font-size: 0.90rem;
+}
+body.text-scale-compact button,
+body.text-scale-compact input,
+body.text-scale-compact select {
+    font-size: 0.85rem;
+}
+
+body.text-scale-normal {
+    font-size: 1rem;
+}
+
+body.text-scale-large {
+    font-size: 1.08rem;
+}
+body.text-scale-large button,
+body.text-scale-large input,
+body.text-scale-large select {
+    font-size: 1rem;
+}
+
+/* 3. Distribución de Pantalla POS (Posberry vs Clásico) */
+@media (min-width: 1024px) {
+    body.layout-classic #tab-pos .flex-1.flex.flex-col.lg\:flex-row {
+        flex-direction: row-reverse !important;
+    }
+    body.layout-classic #pos-cart-panel {
+        border-right: none !important;
+        border-left: 1px solid #e2e8f0;
+    }
+}
+
+/* 4. Estilos de Pestañas Superiores */
+body.tab-style-pills .tab-btn {
+    border-radius: 9999px !important;
+}
+body.tab-style-classic .tab-btn {
+    border-radius: 4px !important;
+}
+body.tab-style-underline .tab-btn {
+    border-radius: 0px !important;
+    border-bottom: 3px solid transparent !important;
+}
+body.tab-style-underline .tab-btn.bg-white {
+    background-color: transparent !important;
+    color: #ffffff !important;
+    border-bottom: 3px solid #fef08a !important;
+    font-weight: 800 !important;
+}
+body.tab-style-folder .tab-btn {
+    border-top-left-radius: 8px !important;
+    border-top-right-radius: 8px !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+/* 5. Radio de Bordes (Sharp, Smooth, Round) */
+body.radius-sharp button,
+body.radius-sharp input,
+body.radius-sharp select,
+body.radius-sharp div.rounded-2xl,
+body.radius-sharp div.rounded-3xl,
+body.radius-sharp div.rounded-xl {
+    border-radius: 4px !important;
+}
+
+body.radius-round button,
+body.radius-round div.rounded-xl {
+    border-radius: 16px !important;
+}
+body.radius-round div.rounded-2xl {
+    border-radius: 24px !important;
+}
+body.radius-round div.rounded-3xl {
+    border-radius: 32px !important;
+}
+
+/* ==========================================================================
+   ESCÁNER DE CÓDIGO DE BARRAS POR CÁMARA (CELULAR & WEBCAM)
+   ========================================================================== */
+@keyframes laser-sweep {
+    0% { top: 6%; opacity: 0.9; }
+    50% { top: 92%; opacity: 1; }
+    100% { top: 6%; opacity: 0.9; }
+}
+
+.scanner-laser-line {
+    animation: laser-sweep 2.2s infinite ease-in-out;
+}
+
+#camera-scanner-reader video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 0.75rem;
+}
+
+#camera-scanner-reader {
+    border: none !important;
+}
+
+/* ==========================================================================
+   FIX CELULAR (2026-11-12)
+   1) La altura 100% del body se comía el footer (barra COBRAR) debajo del
+      navegador del celular. 100dvh sigue el alto REAL visible.
+   2) El modal de cobro no tenía scroll: en pantallas bajas o con el teclado
+      abierto, el botón FINALIZAR VENTA quedaba fuera de la pantalla.
+   ========================================================================== */
+html.h-full,
+body.h-full {
+    height: 100dvh;
+}
+
+@supports not (height: 100dvh) {
+    html.h-full,
+    body.h-full {
+        height: 100%;
+    }
+}
+
+#modal-checkout,
+#modal-scale,
+#modal-mass-price {
+    -webkit-overflow-scrolling: touch;
+}
+
+#modal-checkout > div {
+    overscroll-behavior: contain;
+}

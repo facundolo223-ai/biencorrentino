@@ -1,0 +1,21 @@
+{
+  "appId": "com.rsmarket.pos",
+  "appName": "R&S MARKET POS",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://rsmarket-production.up.railway.app",
+    "cleartext": true,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
+  },
+  "ios": {
+    "contentInset": "always",
+    "allowsLinkPreview": false,
+    "scrollEnabled": true
+  }
+}

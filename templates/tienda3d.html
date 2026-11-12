@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-900 overflow-hidden select-none">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>{{ config.business_name or 'R&S MARKET' }} - Tienda Virtual 3D</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Outfit', 'Inter', sans-serif;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            overscroll-behavior: none;
+        }
+
+        #canvas-container canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Estilo para el joystick virtual móvil */
+        #joystick-zone {
+            touch-action: none;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Animación suave de pulso para la mira interactiva */
+        @keyframes reticle-pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.9; }
+        }
+        .reticle-center {
+            animation: reticle-pulse 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="h-full w-full bg-slate-950 text-white overflow-hidden relative">
+
+    <!-- CONTENEDOR THREE.JS 3D -->
+    <div id="canvas-container" class="absolute inset-0 z-0"></div>
+
+    <!-- PUNTERO / MIRA CENTRAL EN PANTALLA -->
+    <div id="center-reticle" class="pointer-events-none fixed top-1/2 left-1/2 w-4 h-4 rounded-full border-2 border-white/60 reticle-center z-10 hidden sm:block">
+        <div class="w-1 h-1 bg-orange-500 rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+    </div>
+
+    <!-- PANTALLA DE CARGA INICIAL -->
+    <div id="loading-screen" class="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-700">
+        <div class="relative w-20 h-20 mb-6">
+            <div class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-orange-600 to-red-600 animate-spin opacity-40 blur-md"></div>
+            <div class="relative w-full h-full rounded-3xl bg-slate-900 border border-orange-500/50 flex items-center justify-center shadow-2xl">
+                <i data-lucide="shopping-cart" class="w-9 h-9 text-orange-500 animate-bounce"></i>
+            </div>
+        </div>
+        <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight uppercase">
+            {{ config.business_name or 'R&S MARKET' }}
+        </h2>
+        <p class="text-sm text-orange-400 font-semibold mt-1">Supermercado Virtual 3D</p>
+        <p id="loading-status-text" class="text-xs text-slate-400 mt-4 max-w-xs">
+            Cargando estantes, heladeras y góndolas con productos reales...
+        </p>
+        <div class="w-48 h-1.5 bg-slate-800 rounded-full mt-5 overflow-hidden">
+            <div id="loading-bar-fill" class="h-full bg-gradient-to-r from-orange-500 to-red-500 w-1/3 transition-all duration-300"></div>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         HUD / INTERFAZ SUPERIOR (ENCABEZADO DE COMPRAS)
+         ==================================================================== -->
+    <header class="absolute top-0 inset-x-0 z-20 p-3 sm:p-4 flex items-center justify-between pointer-events-none">
+        
+        <!-- Marca & Estado -->
+        <div class="pointer-events-auto flex items-center gap-2.5 bg-slate-900/85 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-slate-700/80 shadow-2xl">
+            {% if config.business_logo %}
+                <img src="{{ config.business_logo }}" alt="Logo" class="h-6 w-auto max-w-[80px] object-contain rounded bg-white/10 p-0.5">
+            {% else %}
+                <div class="w-7 h-7 rounded-xl bg-orange-600/30 border border-orange-500/40 flex items-center justify-center text-orange-400">
+                    <i data-lucide="store" class="w-4 h-4"></i>
+                </div>
+            {% endif %}
+            <div>
+                <h1 class="text-xs sm:text-sm font-black tracking-tight text-white uppercase leading-none">
+                    {{ config.business_name or 'R&S MARKET' }}
+                </h1>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Tienda 3D Online</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barra de Búsqueda de Productos en la Tienda 3D -->
+        <div class="pointer-events-auto relative max-w-xs sm:max-w-sm w-full mx-2 hidden sm:block">
+            <div class="relative flex items-center">
+                <input type="text" id="store3d-search-input" placeholder="Buscar en estantes y góndolas..." 
+                    autocomplete="off"
+                    class="w-full bg-slate-900/90 text-white placeholder-slate-400 text-xs px-3.5 py-2 pl-9 pr-8 rounded-2xl border border-slate-700/80 focus:outline-none focus:border-orange-500 shadow-2xl backdrop-blur-md transition">
+                <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none"></i>
+                <button type="button" id="store3d-search-clear" onclick="clearStore3dSearch()" class="hidden absolute right-2.5 text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                </button>
+            </div>
+            <!-- Desplegable con resultados de búsqueda -->
+            <div id="store3d-search-results" class="hidden absolute top-full left-0 right-0 mt-1.5 bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-2xl shadow-2xl max-h-72 overflow-y-auto divide-y divide-slate-800/80 z-50"></div>
+        </div>
+
+        <!-- Botones de Acción (Carrito, Pantalla Completa, Salir) -->
+        <div class="pointer-events-auto flex items-center gap-2">
+            <!-- Botón de Ayuda / Controles -->
+            <button onclick="toggleHelpModal()" class="w-10 h-10 rounded-2xl bg-slate-900/85 hover:bg-slate-800 border border-slate-700/80 text-slate-300 hover:text-white flex items-center justify-center shadow-xl transition" title="Controles y Ayuda">
+                <i data-lucide="help-circle" class="w-5 h-5"></i>
+            </button>
+
+            <!-- Botón Carrito Flotante -->
+            <button onclick="openCartDrawer()" id="hud-cart-btn" class="px-3.5 py-2 rounded-2xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-2xl shadow-orange-600/30 border border-orange-400/30 active:scale-95 transition">
+                <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                <span>Carrito</span>
+                <span id="hud-cart-badge" class="px-1.5 py-0.5 rounded-lg bg-white/20 text-white text-[11px] font-black">0</span>
+                <span id="hud-cart-total" class="font-mono text-amber-200 hidden sm:inline">$0</span>
+            </button>
+
+            <!-- Botón Salir / Volver al POS -->
+            <a href="/" class="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-slate-900/85 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-300 hover:text-white shadow-xl transition">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                <span>Caja POS</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- GUÍA DE AYUDA / CONTROLES RÁPIDOS -->
+    <div id="quick-controls-hint" class="pointer-events-none absolute top-16 inset-x-0 z-20 flex justify-center p-2 transition-opacity duration-500">
+        <div class="bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-full border border-slate-700 text-center text-xs text-slate-300 shadow-xl max-w-md">
+            <span class="sm:hidden">👉 <b>Arrastrá</b> para mirar • Usá el <b>joystick</b> para caminar • <b>Tocá un producto</b> para elegirlo</span>
+            <span class="hidden sm:inline">🎮 <b>W, A, S, D</b> o flechas para caminar • <b>Arrastrá el mouse</b> para mirar • <b>Click en un producto</b> para comprarlo</span>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         PASILLOS RÁPIDOS / TELETRANSPORTADOR INFERIOR
+         ==================================================================== -->
+    <div class="absolute bottom-3 sm:bottom-4 inset-x-0 z-20 flex flex-col items-center gap-2 pointer-events-none px-3">
+        
+        <!-- Carrusel de Pasillos y Estantes -->
+        <div class="pointer-events-auto flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md p-1.5 rounded-2xl border border-slate-700/80 shadow-2xl max-w-full overflow-x-auto no-scrollbar">
+            <button onclick="teleportToSection('bebidas')" class="teleport-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-cyan-300 hover:bg-cyan-950/60 border border-cyan-500/30 transition flex-shrink-0 active:scale-95">
+                <i data-lucide="cup-soda" class="w-3.5 h-3.5 text-cyan-400"></i>
+                <span>Góndola Bebidas</span>
+            </button>
+            <button onclick="teleportToSection('lacteos')" class="teleport-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-blue-300 hover:bg-blue-950/60 border border-blue-500/30 transition flex-shrink-0 active:scale-95">
+                <i data-lucide="milk" class="w-3.5 h-3.5 text-blue-400"></i>
+                <span>Góndola Lácteos</span>
+            </button>
+            <button onclick="teleportToSection('almacen')" class="teleport-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-amber-300 hover:bg-amber-950/60 border border-amber-500/30 transition flex-shrink-0 active:scale-95">
+                <i data-lucide="package" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>Góndola Almacén</span>
+            </button>
+            <button onclick="teleportToSection('kiosco')" class="teleport-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-pink-300 hover:bg-pink-950/60 border border-pink-500/30 transition flex-shrink-0 active:scale-95">
+                <i data-lucide="candy" class="w-3.5 h-3.5 text-pink-400"></i>
+                <span>Kiosco & Snacks</span>
+            </button>
+            <button onclick="teleportToSection('limpieza')" class="teleport-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-emerald-300 hover:bg-emerald-950/60 border border-emerald-500/30 transition flex-shrink-0 active:scale-95">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span>Limpieza</span>
+            </button>
+            <button onclick="teleportToSection('verduleria')" class="teleport-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-lime-300 hover:bg-lime-950/60 border border-lime-500/30 transition flex-shrink-0 active:scale-95">
+                <i data-lucide="apple" class="w-3.5 h-3.5 text-lime-400"></i>
+                <span>Verdulería</span>
+            </button>
+            <button onclick="teleportToSection('caja')" class="teleport-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-orange-600 text-white hover:bg-orange-500 shadow-md shadow-orange-600/30 transition flex-shrink-0 active:scale-95">
+                <i data-lucide="banknote" class="w-3.5 h-3.5"></i>
+                <span>Mostrador Caja</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- JOYSTICK TÁCTIL VIRTUAL PARA CELULARES (ESQUINA INFERIOR IZQUIERDA) -->
+    <div id="joystick-zone" class="sm:hidden absolute bottom-20 left-5 z-20 w-28 h-28 rounded-full bg-slate-900/60 border-2 border-slate-700/80 backdrop-blur-sm pointer-events-auto flex items-center justify-center">
+        <div id="joystick-knob" class="w-12 h-12 rounded-full bg-orange-500/80 border border-white/50 shadow-xl pointer-events-none transform transition-transform duration-75"></div>
+        <div class="absolute -top-5 text-[10px] text-slate-400 font-bold uppercase tracking-wider pointer-events-none">Caminar</div>
+    </div>
+
+    <!-- ====================================================================
+         TARJETA FLOTANTE DE PRODUCTO SELECCIONADO (AL HACER CLICK/TAP EN 3D)
+         ==================================================================== -->
+    <div id="product-card-modal" class="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-5 max-w-sm w-full text-white shadow-2xl space-y-4 animate-scale-up">
+            
+            <div class="flex items-start justify-between">
+                <div>
+                    <span id="prod-card-category" class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                        Categoría
+                    </span>
+                    <h3 id="prod-card-name" class="text-base sm:text-lg font-bold text-white mt-1 leading-snug">
+                        Nombre del Producto
+                    </h3>
+                </div>
+                <button onclick="closeProductCard()" class="p-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Precios y Stock -->
+            <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700/60 flex items-center justify-between">
+                <div>
+                    <div class="text-[10px] text-slate-400 font-medium">Precio Unitario</div>
+                    <div id="prod-card-price" class="text-2xl font-black text-orange-400 font-mono">
+                        $0.00
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-[10px] text-slate-400 font-medium">Disponibilidad</div>
+                    <div id="prod-card-stock" class="text-xs font-bold text-emerald-400 flex items-center gap-1 justify-end">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span> En Stock
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cantidad & Botón Agregar -->
+            <div class="flex items-center gap-3">
+                <div class="flex items-center bg-slate-800 rounded-2xl border border-slate-700 p-1">
+                    <button onclick="changeCardQuantity(-1)" class="w-8 h-8 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold flex items-center justify-center transition active:scale-95">
+                        -
+                    </button>
+                    <span id="prod-card-qty" class="w-10 text-center font-bold text-sm font-mono">1</span>
+                    <button onclick="changeCardQuantity(1)" class="w-8 h-8 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold flex items-center justify-center transition active:scale-95">
+                        +
+                    </button>
+                </div>
+
+                <button onclick="addSelectedProductToCart()" class="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold text-sm shadow-xl shadow-orange-600/30 flex items-center justify-center gap-2 active:scale-95 transition">
+                    <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+                    <span>Elegir Producto</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         CAJÓN DESLIZANTE DEL CARRITO DE COMPRAS (DRAWER)
+         ==================================================================== -->
+    <div id="cart-drawer" class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-slate-900 border-l border-slate-800 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300">
+        
+        <!-- Header Carrito -->
+        <div class="p-4 bg-slate-800/80 border-b border-slate-700 flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-xl bg-orange-600/20 text-orange-400 border border-orange-500/30 flex items-center justify-center">
+                    <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-sm text-white">Tu Carrito de Supermercado</h3>
+                    <p class="text-[11px] text-slate-400">Productos seleccionados en el recorrido 3D</p>
+                </div>
+            </div>
+            <button onclick="closeCartDrawer()" class="p-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white transition">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <!-- Lista de Artículos -->
+        <div id="cart-drawer-items" class="flex-1 overflow-y-auto p-4 space-y-2.5 divide-y divide-slate-800">
+            <!-- Rellenado dinámicamente con JS -->
+            <div class="text-center py-12 text-slate-400 space-y-2">
+                <i data-lucide="shopping-bag" class="w-12 h-12 mx-auto text-slate-600 opacity-50"></i>
+                <p class="text-sm">Tu carrito todavía está vacío.</p>
+                <p class="text-xs text-slate-500">Caminá por los estantes y tocá cualquier producto para agregarlo.</p>
+            </div>
+        </div>
+
+        <!-- Resumen y Checkout -->
+        <div class="p-4 bg-slate-950 border-t border-slate-800 space-y-3 flex-shrink-0">
+            <div class="flex items-center justify-between text-slate-400 text-xs">
+                <span>Total de artículos:</span>
+                <span id="cart-drawer-count" class="font-bold text-white font-mono">0</span>
+            </div>
+            <div class="flex items-center justify-between text-base sm:text-lg font-black border-t border-slate-800 pt-2">
+                <span class="text-white">TOTAL A PAGAR:</span>
+                <span id="cart-drawer-total" class="text-orange-400 font-mono text-xl sm:text-2xl">$0.00</span>
+            </div>
+
+            <!-- Datos de Contacto para el Pedido -->
+            <div class="space-y-2 pt-1 text-xs">
+                <input type="text" id="order-customer-name" placeholder="Tu Nombre y Apellido *" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-orange-500">
+                <select id="order-delivery-type" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-orange-500">
+                    <option value="retiro">Retiro en el local (Pasa a buscar)</option>
+                    <option value="delivery">Envío a domicilio (Delivery)</option>
+                </select>
+                <input type="text" id="order-delivery-address" placeholder="Dirección de entrega (si es envío)" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-orange-500 hidden">
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <!-- Enviar por WhatsApp -->
+                <button onclick="sendOrderViaWhatsApp()" class="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/20 active:scale-95 transition">
+                    <i data-lucide="message-circle" class="w-4 h-4"></i>
+                    <span>Pedir x WhatsApp</span>
+                </button>
+                <!-- Confirmar Directo en Sistema -->
+                <button onclick="submitDirectStoreOrder()" class="py-2.5 px-3 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-orange-600/30 active:scale-95 transition">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    <span>Confirmar al POS</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL DE AYUDA Y CONTROLES -->
+    <div id="help-modal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-6 max-w-md w-full text-white shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-base flex items-center gap-2">
+                    <i data-lucide="gamepad-2" class="w-5 h-5 text-orange-500"></i> ¿Cómo Navegar la Tienda 3D?
+                </h3>
+                <button onclick="toggleHelpModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="space-y-3 text-xs text-slate-300">
+                <div class="p-3 bg-slate-800/80 rounded-2xl border border-slate-700/60 space-y-1">
+                    <div class="font-bold text-orange-400 flex items-center gap-1.5">
+                        <i data-lucide="smartphone" class="w-4 h-4"></i> En Celulares y Tablets:
+                    </div>
+                    <p>• <b>Mirar:</b> Deslizá tu dedo en cualquier parte de la pantalla para girar la cabeza 360°.</p>
+                    <p>• <b>Caminar:</b> Usá el círculo de joystick en la esquina inferior izquierda.</p>
+                    <p>• <b>Comprar:</b> Tocá cualquier producto en el estante o heladera para ver su precio y agregarlo.</p>
+                </div>
+                <div class="p-3 bg-slate-800/80 rounded-2xl border border-slate-700/60 space-y-1">
+                    <div class="font-bold text-cyan-400 flex items-center gap-1.5">
+                        <i data-lucide="monitor" class="w-4 h-4"></i> En Computadoras (PC/Notebook):
+                    </div>
+                    <p>• <b>Teclas W, A, S, D</b> o Flechas del teclado para caminar.</p>
+                    <p>• <b>Arrastrá con el ratón</b> para girar tu punto de vista.</p>
+                    <p>• <b>Hacé click</b> sobre el producto que quieras comprar.</p>
+                </div>
+                <div class="p-3 bg-slate-800/80 rounded-2xl border border-slate-700/60 space-y-1">
+                    <div class="font-bold text-emerald-400 flex items-center gap-1.5">
+                        <i data-lucide="zap" class="w-4 h-4"></i> Atajos Rápidos de Pasillo:
+                    </div>
+                    <p>Tocá los botones inferiores (Heladera, Almacén, Kiosco, etc.) para saltar al instante frente a cada estante.</p>
+                </div>
+            </div>
+            <button onclick="toggleHelpModal()" class="w-full py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition">
+                ¡Entendido, a comprar!
+            </button>
+        </div>
+    </div>
+
+    <!-- Script de la Experiencia 3D Three.js -->
+    <script src="/static/js/store-3d.js"></script>
+</body>
+</html>

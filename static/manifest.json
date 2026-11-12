@@ -1,0 +1,28 @@
+{
+  "name": "R&S MARKET - Sistema POS",
+  "short_name": "R&S MARKET",
+  "description": "Punto de Venta y Facturación para Supermercado y Almacén",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#ea580c",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "finance", "productivity"],
+  "lang": "es-AR",
+  "dir": "ltr"
+}

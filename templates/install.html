@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Instalar App Móvil - R&S MARKET POS (Android & iOS)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- QRCode.js para generación rápida de QR -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#ea580c">
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col items-center justify-center p-4 selection:bg-orange-500 font-sans">
+
+    <div class="max-w-lg w-full bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-orange-950/10 text-center space-y-6 my-6">
+        
+        <!-- Logo y Cabecera -->
+        <div class="space-y-3">
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-orange-600 to-red-500 mx-auto flex items-center justify-center shadow-lg shadow-orange-500/30 text-white font-black text-3xl">
+                🛒
+            </div>
+            <div>
+                <h1 class="text-2xl font-black text-slate-900 tracking-tight">R&S MARKET POS</h1>
+                <p class="text-xs text-orange-600 font-bold uppercase tracking-wider">Aplicación Oficial Multiplataforma</p>
+                <p class="text-xs text-slate-500 mt-1">Compatible al 100% con teléfonos y tablets <strong>Android</strong> y <strong>iPhone / iPad (iOS)</strong></p>
+            </div>
+        </div>
+
+        <!-- Selector de Plataforma (Solapas Android / iOS) -->
+        <div class="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
+            <button type="button" onclick="setPlatformTab('android')" id="tab-btn-android"
+                class="py-2.5 px-3 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 bg-white text-orange-600 shadow-sm">
+                <span class="text-base">🤖</span>
+                <span>Android (Samsung, Xiaomi, Motorola...)</span>
+            </button>
+            <button type="button" onclick="setPlatformTab('ios')" id="tab-btn-ios"
+                class="py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900">
+                <span class="text-base">🍏</span>
+                <span>iPhone & iPad (iOS)</span>
+            </button>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- CONTENIDO SOLAPA ANDROID -->
+        <!-- ============================================================== -->
+        <div id="content-android" class="space-y-4 text-left">
+            <!-- Opción 1: Descargar APK Nativo -->
+            <div class="bg-orange-50/70 border border-orange-200 rounded-2xl p-4 space-y-3">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-orange-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm font-bold">
+                        <i data-lucide="download" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <h2 class="font-bold text-sm text-slate-900">Opción 1: Descargar APK Oficial</h2>
+                            <span class="bg-emerald-600 text-[10px] text-white font-black px-2 py-0.5 rounded-full uppercase">Directo</span>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-0.5">Instalá la aplicación en cualquier celular o tablet Android sin depender de tiendas.</p>
+                    </div>
+                </div>
+
+                <a href="/download-apk" class="w-full py-3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-600/30 flex items-center justify-center gap-2 transition active:scale-98">
+                    <i data-lucide="smartphone" class="w-4 h-4"></i> Descargar Instalador APK (4.8 MB)
+                </a>
+                
+                <p class="text-[11px] text-slate-500 text-center">
+                    💡 Si tu teléfono te pide permiso, seleccioná <em>"Permitir instalar aplicaciones de esta fuente"</em>.
+                </p>
+            </div>
+
+            <!-- Opción 2: Instalar PWA con 1-clic desde Chrome -->
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 font-bold">
+                        <i data-lucide="zap" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h2 class="font-bold text-sm text-slate-900">Opción 2: Instalar al instante (WebAPK)</h2>
+                        <p class="text-xs text-slate-600 mt-0.5">Desde Google Chrome o Edge en tu teléfono, sin descargas pesadas.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5 text-xs text-slate-700 bg-white p-3 rounded-xl border border-slate-200">
+                    <div class="flex items-center gap-2">
+                        <span class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 font-bold flex items-center justify-center text-[10px]">1</span>
+                        <span>Abrí el menú de Chrome (los <strong>tres puntitos ⋮</strong> arriba a la derecha).</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 font-bold flex items-center justify-center text-[10px]">2</span>
+                        <span>Tocá <strong>"Instalar aplicación"</strong> o <strong>"Agregar a pantalla principal"</strong>.</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 font-bold flex items-center justify-center text-[10px]">3</span>
+                        <span>¡Listo! Te quedará el ícono en tu pantalla como cualquier app.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- CONTENIDO SOLAPA iOS (iPhone & iPad) -->
+        <!-- ============================================================== -->
+        <div id="content-ios" class="space-y-4 text-left hidden">
+            <div class="bg-sky-50/70 border border-sky-200 rounded-2xl p-4 space-y-3">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm font-bold">
+                        <i data-lucide="apple" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <h2 class="font-bold text-sm text-slate-900">Instalación Nativa en iPhone & iPad</h2>
+                            <span class="bg-sky-600 text-[10px] text-white font-black px-2 py-0.5 rounded-full uppercase">iOS Oficial</span>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-0.5">En Apple iOS la app se instala mediante Safari directamente a la pantalla de inicio sin pasar por App Store.</p>
+                    </div>
+                </div>
+
+                <!-- Pasos ilustrados para iPhone -->
+                <div class="space-y-2.5 text-xs text-slate-700 bg-white p-3.5 rounded-2xl border border-sky-200 shadow-sm">
+                    <div class="flex items-start gap-2.5">
+                        <div class="w-6 h-6 rounded-full bg-sky-100 text-sky-700 font-black flex items-center justify-center text-xs flex-shrink-0 mt-0.5">1</div>
+                        <div>
+                            <strong>Abrí esta web en Safari:</strong>
+                            <p class="text-[11px] text-slate-500 mt-0.5">Asegurate de usar el navegador <em>Safari</em> oficial de tu iPhone.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-2.5">
+                        <div class="w-6 h-6 rounded-full bg-sky-100 text-sky-700 font-black flex items-center justify-center text-xs flex-shrink-0 mt-0.5">2</div>
+                        <div>
+                            <strong>Tocá el botón Compartir ⬆️:</strong>
+                            <p class="text-[11px] text-slate-500 mt-0.5">Es el ícono cuadrado con la flecha hacia arriba en la barra inferior de Safari.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-2.5">
+                        <div class="w-6 h-6 rounded-full bg-sky-100 text-sky-700 font-black flex items-center justify-center text-xs flex-shrink-0 mt-0.5">3</div>
+                        <div>
+                            <strong>Elegí "Añadir a pantalla de inicio" ➕:</strong>
+                            <p class="text-[11px] text-slate-500 mt-0.5">Deslizá hacia abajo en el menú de opciones hasta encontrar el ícono del cuadrado con el signo más (+).</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-2.5">
+                        <div class="w-6 h-6 rounded-full bg-sky-100 text-sky-700 font-black flex items-center justify-center text-xs flex-shrink-0 mt-0.5">4</div>
+                        <div>
+                            <strong>Tocá "Añadir" arriba a la derecha:</strong>
+                            <p class="text-[11px] text-slate-500 mt-0.5">¡Listo! La app se abrirá en <strong>pantalla completa</strong>, sin barras de Safari, con escáner de cámara e inicio de sesión persistente.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="/" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-lg shadow-slate-900/20 flex items-center justify-center gap-2 transition active:scale-98">
+                    <i data-lucide="arrow-right" class="w-4 h-4 text-orange-400"></i> Abrir Punto de Venta en Safari Ahora
+                </a>
+            </div>
+        </div>
+
+        <!-- Código QR para abrir al instante en cualquier teléfono -->
+        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-2">
+            <div class="text-xs font-bold text-slate-800 flex items-center justify-center gap-1.5">
+                <i data-lucide="qr-code" class="w-4 h-4 text-orange-600"></i> Escanear con la Cámara del Celular
+            </div>
+            <p class="text-[11px] text-slate-500">Apuntá con la cámara de tu Android o iPhone para abrir e instalar directamente:</p>
+            <div id="qrcode" class="flex justify-center p-2 bg-white rounded-xl shadow-sm border border-slate-200 w-fit mx-auto"></div>
+            <div class="text-[11px] font-mono text-slate-500 break-all pt-1" id="qr-url-text">https://rsmarket-production.up.railway.app</div>
+        </div>
+
+        <!-- Botón para entrar al sistema -->
+        <a href="/" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs rounded-xl flex items-center justify-center gap-2 transition border border-slate-300">
+            <i data-lucide="store" class="w-4 h-4 text-orange-600"></i> Entrar al Sistema en el Navegador
+        </a>
+
+        <!-- Nota técnica -->
+        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-left flex items-start gap-2.5">
+            <i data-lucide="shield-check" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5"></i>
+            <p class="text-[11px] text-amber-950 leading-relaxed">
+                <strong>Sincronización en la nube:</strong> Cualquier venta, producto o cobro realizado desde la aplicación en tu celular impacta al instante en la base de datos central.
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        // Inicializar iconos Lucide
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        // Generar QR dinámico con la URL actual
+        const currentUrl = window.location.origin;
+        const qrContainer = document.getElementById("qrcode");
+        if (qrContainer && typeof QRCode !== 'undefined') {
+            new QRCode(qrContainer, {
+                text: currentUrl,
+                width: 130,
+                height: 130,
+                colorDark : "#0f172a",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.M
+            });
+            const textEl = document.getElementById("qr-url-text");
+            if (textEl) textEl.textContent = currentUrl;
+        }
+
+        function setPlatformTab(tab) {
+            const btnAndroid = document.getElementById('tab-btn-android');
+            const btnIos = document.getElementById('tab-btn-ios');
+            const contentAndroid = document.getElementById('content-android');
+            const contentIos = document.getElementById('content-ios');
+
+            if (tab === 'ios') {
+                btnIos.className = "py-2.5 px-3 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 bg-white text-sky-600 shadow-sm";
+                btnAndroid.className = "py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900";
+                contentIos.classList.remove('hidden');
+                contentAndroid.classList.add('hidden');
+            } else {
+                btnAndroid.className = "py-2.5 px-3 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 bg-white text-orange-600 shadow-sm";
+                btnIos.className = "py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900";
+                contentAndroid.classList.remove('hidden');
+                contentIos.classList.add('hidden');
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        // Detección automática al cargar la página: Si es iPhone o iPad, mostrar solapa iOS por defecto
+        const isAppleDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isAppleDevice) {
+            setPlatformTab('ios');
+        }
+    </script>
+</body>
+</html>
