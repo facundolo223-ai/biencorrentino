@@ -383,6 +383,12 @@
     </div>
 
     <!-- Script de la Experiencia 3D Three.js -->
+    <script>
+        // WhatsApp del local: sale de Configuración (business_whatsapp).
+        // Acepta 3794821358, 5493794821358 o "+54 9 379 482-1358".
+        window.STORE_WHATSAPP = "{{ config.business_whatsapp or config.business_phone or '5493794821358' }}";
+        window.STORE_NAME = "{{ config.business_name or 'R&S MARKET' }}";
+    </script>
     <script src="/static/js/store-3d.js"></script>
 </body>
 </html>

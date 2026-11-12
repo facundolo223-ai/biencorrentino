@@ -1304,7 +1304,31 @@ function sendOrderViaWhatsApp() {
         return;
     }
 
+    const url = `https://wa.me/${getStoreWhatsApp()}?text=${encodeURIComponent(buildOrderMessage(name, delivery, address))}`;
+    window.open(url, '_blank');
+}
+
+/**
+ * WhatsApp del local. Viene de Configuración (business_whatsapp) y se normaliza
+ * al formato internacional que exige wa.me: 3794821358 -> 5493794821358
+ */
+function getStoreWhatsApp() {
+    let n = String(window.STORE_WHATSAPP || '5493794821358').replace(/\D/g, '');
+    n = n.replace(/^0+/, '');
+    if (n.length === 10) {
+        n = '549' + n;                        // 3794821358
+    } else if (n.length === 11 && n.startsWith('54')) {
+        n = '549' + n.slice(2);               // 543794821358
+    }
+    return n;
+}
+
+/**
+ * Arma el texto del pedido. Si viene el número de ticket lo incluye arriba.
+ */
+function buildOrderMessage(name, delivery, address, ticketNumber) {
     let msg = `🛒 *NUEVO PEDIDO DESDE LA TIENDA 3D*\n`;
+    if (ticketNumber) msg += `🧾 *Ticket:* ${ticketNumber}\n`;
     msg += `👤 *Cliente:* ${name}\n`;
     msg += `📦 *Modalidad:* ${delivery === 'delivery' ? 'Envío a Domicilio' : 'Retiro en el local'}\n`;
     if (delivery === 'delivery' && address) {
@@ -1321,10 +1345,7 @@ function sendOrderViaWhatsApp() {
 
     msg += `\n💰 *TOTAL:* $${formatPrice(total)}\n`;
     msg += `\n_Pedido realizado a través del Supermercado Virtual 3D_`;
-
-    const phone = "5493795062876"; // Teléfono configurado del comercio
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
+    return msg;
 }
 
 /**
@@ -1358,10 +1379,18 @@ async function submitDirectStoreOrder() {
         if (res.ok) {
             const data = await res.json();
             playBeep(1800, 0.2);
-            alert(`¡Excelente ${name}!\nTu pedido fue enviado directamente a la caja del comercio.\nTicket generado: ${data.order_number || 'OK'}`);
+
+            // Armar el mensaje ANTES de vaciar el carrito
+            const ticket = data.order_number || data.ticket_number || data.order_id || '';
+            const msg = buildOrderMessage(name, delivery, address, ticket);
+
             virtualCart = [];
             saveVirtualCart();
             closeCartDrawer();
+
+            // El pedido también llega al WhatsApp del local con el ticket ya generado
+            const waUrl = `https://wa.me/${getStoreWhatsApp()}?text=${encodeURIComponent(msg)}`;
+            window.location.href = waUrl;
         } else {
             const err = await res.json();
             alert("No se pudo procesar: " + (err.error || "Intente nuevamente"));

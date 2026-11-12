@@ -193,7 +193,7 @@ def init_db():
         ("business_cuit", "20-38491823-9"),
         ("business_address", "Av. San Martin 1420"),
         ("business_phone", "+54 9 379 506-2876"),
-        ("business_whatsapp", "5493795062876"),
+        ("business_whatsapp", "5493794821358"),
         ("business_footer", "Gracias por su compra! Vuelva pronto."),
         ("currency_symbol", "$"),
         ("scale_prefix", "20"),
