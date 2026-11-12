@@ -71,3 +71,27 @@ El sistema iniciará automáticamente y abrirá la pantalla en tu navegador en:
 - `static/js/app.js`: Motor de alta velocidad para escaneo continuo, atajos y cálculo de vuelto.
 - `static/css/style.css`: Reglas de maquetado e impresión térmica sin márgenes.
 - `iniciar.bat`: Lanzador automático para Windows.
+
+---
+
+## ☁️ Deploy en Railway (producción)
+
+| Variable | Valor | Para qué |
+| --- | --- | --- |
+| `SUPERMERCADO_DB` | `/app/data/supermercado.db` | Base SQLite dentro del volumen persistente |
+| `UPLOADS_DIR` | `/app/data/uploads` | Logo, banners y fotos de productos |
+| `SECRET_KEY` | (opcional) | Firma de sesiones |
+
+- El volumen `rsmarket-volume` se monta en `/app/data`. Railway permite **un solo volumen por servicio**, por eso la base y las imágenes viven juntas ahí.
+- Deploy automático: cada push a `main` reconstruye la imagen con el `Dockerfile`.
+- La base **no** va en el repo (ver `.dockerignore`): si se incluyera, cada deploy pisaría los datos reales.
+- Ruta que sirve las imágenes del volumen: `/static/uploads/<archivo>` (definida en `app.py`).
+
+## 📱 Fix de cobro en celular (2026-11-12)
+
+El botón de cobro quedaba tapado por la barra del navegador y el modal no tenía scroll:
+
+- `body`/`html` usan `100dvh` en vez de `100%` (`static/css/style.css`).
+- Botón **COBRAR** agregado al pie del ticket (`templates/index.html`), visible sin depender del footer.
+- Modal de cobro con `overflow-y-auto` y `max-h-[calc(100dvh-...)]` para pantallas bajas o con teclado abierto.
+- `service-worker.js` en `v3` para invalidar la caché vieja del celular.
