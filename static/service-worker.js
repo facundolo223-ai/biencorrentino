@@ -1,7 +1,7 @@
-// =============================================================
+﻿// =============================================================
 // R&S MARKET POS - Service Worker (PWA Offline & Cache)
 // =============================================================
-const CACHE_NAME = 'rsmarket-pos-v4';
+const CACHE_NAME = 'rsmarket-pos-v5';
 const STATIC_ASSETS = [
   '/',
   '/static/css/style.css',
@@ -11,12 +11,12 @@ const STATIC_ASSETS = [
   '/static/manifest.json'
 ];
 
-// Instalar: pre-cachear assets estáticos
+// Instalar: pre-cachear assets estÃ¡ticos
 self.addEventListener('install', (event) => {
   console.log('[SW] Instalando Service Worker...');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Cacheando assets estáticos');
+      console.log('[SW] Cacheando assets estÃ¡ticos');
       return cache.addAll(STATIC_ASSETS);
     })
   );
@@ -45,13 +45,13 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // API calls → siempre intentar red primero
+  // API calls â†’ siempre intentar red primero
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(event.request)
         .catch(() => {
           return new Response(
-            JSON.stringify({ error: 'Sin conexión al servidor. Verificá que la PC esté encendida.' }),
+            JSON.stringify({ error: 'Sin conexiÃ³n al servidor. VerificÃ¡ que la PC estÃ© encendida.' }),
             { status: 503, headers: { 'Content-Type': 'application/json' } }
           );
         })
@@ -59,7 +59,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Assets estáticos → Cache first, luego red
+  // Assets estÃ¡ticos â†’ Cache first, luego red
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {

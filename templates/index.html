@@ -1130,6 +1130,29 @@
         </div>
     </div>
 
+    <!-- AVISO POST-VENTA: ENVIAR TICKET AL WHATSAPP DEL LOCAL -->
+    <div id="modal-wa-ticket" class="fixed inset-0 z-[70] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 space-y-4 text-center">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-100 flex items-center justify-center">
+                <i data-lucide="message-circle" class="w-7 h-7 text-emerald-600"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-slate-800">Venta registrada</h3>
+                <p class="text-xs text-slate-500 mt-1">
+                    Ticket <b id="wa-ticket-number" class="font-mono text-slate-700">-</b> ·
+                    <b id="wa-ticket-total" class="font-mono text-slate-700">$0,00</b>
+                </p>
+            </div>
+            <a id="wa-ticket-link" href="#" target="_blank" rel="noopener"
+               class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition">
+                <i data-lucide="send" class="w-5 h-5"></i> Enviar ticket por WhatsApp
+            </a>
+            <button type="button" onclick="closeTicketWhatsAppModal()" class="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition">
+                Cerrar
+            </button>
+        </div>
+    </div>
+
     <!-- MODAL DE BALANZA / PESAR PRODUCTO (F8) -->
     <div id="modal-scale" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 rounded-3xl text-slate-800 shadow-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-slate-800">

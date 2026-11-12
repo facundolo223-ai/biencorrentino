@@ -1273,12 +1273,8 @@ async function confirmCheckout() {
         cashier_name: state.currentUser ? state.currentUser.name : 'Caja 1'
     };
 
-    // La pestaña de WhatsApp se abre AHORA (dentro del clic del cajero): si se abre
-    // después del fetch, el navegador la bloquea como popup.
-    let waTab = null;
-    if (window.SEND_TICKET_WHATSAPP) {
-        try { waTab = window.open('about:blank', 'rsmarket-wa'); } catch (e) { waTab = null; }
-    }
+    // La pestaña automática la bloquea Chrome y además window.print() congela el JS,
+    // así que después de la venta mostramos un aviso con un botón real (nunca se bloquea).
 
     try {
         const res = await fetch('/api/checkout', {
@@ -1289,7 +1285,6 @@ async function confirmCheckout() {
 
         const data = await res.json();
         if (!res.ok || !data.success) {
-            if (waTab) waTab.close();
             alert(data.error || "Error al procesar la venta");
             return;
         }
@@ -1305,23 +1300,39 @@ async function confirmCheckout() {
         loadCurrentShift();
         loadProducts(); // para refrescar stock
 
-        // Enviar el ticket como pedido al WhatsApp del local
-        if (window.SEND_TICKET_WHATSAPP) {
-            const waUrl = `https://wa.me/${getShopWhatsApp()}?text=${encodeURIComponent(buildSaleMessage(data.order))}`;
-            if (waTab && !waTab.closed) {
-                waTab.location.href = waUrl;
-            } else {
-                window.open(waUrl, '_blank');
-            }
-        } else if (waTab) {
-            waTab.close();
-        }
+        // Aviso para mandar el ticket al WhatsApp del local
+        showTicketWhatsAppModal(data.order);
 
     } catch (err) {
-        if (waTab) waTab.close();
         console.error("Error en checkout:", err);
         alert("Hubo un error de conexión al procesar la venta.");
     }
+}
+
+/**
+ * Muestra el aviso posterior a la venta con el acceso directo al WhatsApp del local.
+ */
+function showTicketWhatsAppModal(order) {
+    if (!window.SEND_TICKET_WHATSAPP || !order) return;
+
+    const url = `https://wa.me/${getShopWhatsApp()}?text=${encodeURIComponent(buildSaleMessage(order))}`;
+    const link = document.getElementById('wa-ticket-link');
+    if (link) link.href = url;
+
+    const numEl = document.getElementById('wa-ticket-number');
+    if (numEl) numEl.textContent = order.order_number || '-';
+
+    const totalEl = document.getElementById('wa-ticket-total');
+    if (totalEl) totalEl.textContent = '$' + formatMoney(order.total);
+
+    const modal = document.getElementById('modal-wa-ticket');
+    if (modal) modal.classList.remove('hidden');
+    if (window.lucide) lucide.createIcons();
+}
+
+function closeTicketWhatsAppModal() {
+    const modal = document.getElementById('modal-wa-ticket');
+    if (modal) modal.classList.add('hidden');
 }
 
 /**
@@ -1347,8 +1358,7 @@ function resendLastTicketWhatsApp() {
         alert("Todavía no hay ningún ticket cobrado en esta sesión.\nCobrá una venta y después usá este botón.");
         return;
     }
-    const url = `https://wa.me/${getShopWhatsApp()}?text=${encodeURIComponent(buildSaleMessage(window.lastSaleOrder))}`;
-    window.open(url, '_blank');
+    showTicketWhatsAppModal(window.lastSaleOrder);
 }
 
 /**
