@@ -2514,6 +2514,8 @@ async function loadConfigForm() {
         document.getElementById('cfg-business-cuit').value = cfg.business_cuit || '';
         document.getElementById('cfg-business-address').value = cfg.business_address || '';
         document.getElementById('cfg-business-phone').value = cfg.business_phone || '';
+        const waField = document.getElementById('cfg-business-whatsapp');
+        if (waField) waField.value = cfg.business_whatsapp || '';
         document.getElementById('cfg-scale-prefix').value = cfg.scale_prefix || '20';
         document.getElementById('cfg-ticket-width').value = cfg.ticket_width || '80mm';
         document.getElementById('cfg-business-footer').value = cfg.business_footer || '';
@@ -2539,6 +2541,11 @@ async function saveConfiguration() {
         ticket_width: document.getElementById('cfg-ticket-width').value,
         business_footer: document.getElementById('cfg-business-footer').value.trim()
     };
+
+    const waInput = document.getElementById('cfg-business-whatsapp');
+    if (waInput && waInput.value.trim()) {
+        payload.business_whatsapp = waInput.value.trim();
+    }
 
     try {
         const res = await fetch('/api/config', {
