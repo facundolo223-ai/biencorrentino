@@ -1296,6 +1296,7 @@ async function confirmCheckout() {
 
         // Impresión de Ticket Térmico
         printThermalTicket(data.order);
+        window.lastSaleOrder = data.order;   // para el botón "TICKET WA"
 
         // Limpiar ticket y refrescar datos
         closeCheckoutModal();
@@ -1335,6 +1336,19 @@ function getShopWhatsApp() {
         n = '549' + n.slice(2);
     }
     return n;
+}
+
+/**
+ * Reenvía el último ticket cobrado al WhatsApp del local.
+ * Sirve como respaldo cuando el navegador bloquea la pestaña automática.
+ */
+function resendLastTicketWhatsApp() {
+    if (!window.lastSaleOrder) {
+        alert("Todavía no hay ningún ticket cobrado en esta sesión.\nCobrá una venta y después usá este botón.");
+        return;
+    }
+    const url = `https://wa.me/${getShopWhatsApp()}?text=${encodeURIComponent(buildSaleMessage(window.lastSaleOrder))}`;
+    window.open(url, '_blank');
 }
 
 /**

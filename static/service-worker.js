@@ -1,7 +1,7 @@
 // =============================================================
 // R&S MARKET POS - Service Worker (PWA Offline & Cache)
 // =============================================================
-const CACHE_NAME = 'rsmarket-pos-v3';
+const CACHE_NAME = 'rsmarket-pos-v4';
 const STATIC_ASSETS = [
   '/',
   '/static/css/style.css',
